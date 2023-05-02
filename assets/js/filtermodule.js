@@ -5,24 +5,17 @@ export default (function (btnParentNode, source) {
 
 	let types = Array.from(source)
 		.flatMap((src) => {
-			if (
-				src.getAttribute('data-filtertext') !== null
-			) {
-				const pole = src
-					.getAttribute('data-filtertext')
-					.split(';')
-					.map((n, index) => {
-						return n;
-					});
-				return pole;
+			if (src.getAttribute('data-filtertext') !== null) {
+				return src.getAttribute('data-filtertext').split(';');
 			}
 		})
 		.filter((a) => a !== undefined && a !== null);
 
 	console.log(types);
 
+	//filtrace duplicit
 	types = Array.from(new Set(types));
-	
+
 	console.log(types);
 
 	btnParentNode.append(
@@ -43,7 +36,7 @@ export default (function (btnParentNode, source) {
 					}
 				}
 				const currentSearchParams = new URLSearchParams(window.location.search);
-				currentSearchParams.set('search', newel.getAttribute("data-filter"));
+				currentSearchParams.set('search', newel.getAttribute('data-filter'));
 				window.history.pushState({}, '', '?' + currentSearchParams);
 				e.target.classList.add('btn__filter--active');
 			});
@@ -67,7 +60,7 @@ export default (function (btnParentNode, source) {
 	if (btnParentNode !== null) {
 		for (var x of Array.from(btnParentNode.children)) {
 			if (x.getAttribute('data-filtertext') === 'all') {
-				x.setAttribute("data-filter", "all");
+				x.setAttribute('data-filter', 'all');
 				x.addEventListener('click', (e) => {
 					e.preventDefault();
 					reset(btnParentNode, source);
@@ -97,11 +90,9 @@ function reset(btnParentNode, source) {
 	}
 }
 
-function textTransform(text){
-
+function textTransform(text) {
 	text = text.toLowerCase();
-	text = text.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); //odstranění háčků a čárek
-	text = text.replaceAll(" ","-");
+	text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); //odstranění háčků a čárek
+	text = text.replaceAll(' ', '-');
 	return text;
 }
-
