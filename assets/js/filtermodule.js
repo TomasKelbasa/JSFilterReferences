@@ -6,16 +6,13 @@ export default (function (btnParentNode, source) {
 	let types = Array.from(source)
 		.flatMap((src) => {
 			if (
-				src.getAttribute('data-filter') !== null &&
 				src.getAttribute('data-filtertext') !== null
 			) {
 				const pole = src
-					.getAttribute('data-filter')
+					.getAttribute('data-filtertext')
 					.split(';')
 					.map((n, index) => {
-						return {
-							[n]: src.getAttribute('data-filtertext').split(';')[index],
-						};
+						return n;
 					});
 				return pole;
 			}
@@ -24,33 +21,29 @@ export default (function (btnParentNode, source) {
 
 	console.log(types);
 
-	types = types.reduce((prev, current) => {
-		return Object.assign(prev, current);
-	}, {});
-
-	let types_keys = Object.keys(types);
-	console.log(types_keys);
-
+	types = Array.from(new Set(types));
+	
 	console.log(types);
 
 	btnParentNode.append(
-		...types_keys.map((el) => {
+		...types.map((el) => {
 			const newel = document.createElement('a');
 			newel.classList.add('btn', 'btn__filter');
-			newel.setAttribute('data-filter', el);
-			newel.textContent = types[el];
+			newel.setAttribute('data-filtertext', el);
+			newel.setAttribute('data-filter', textTransform(el));
+			newel.textContent = el;
 			newel.addEventListener('click', (e) => {
 				e.preventDefault();
 				reset(btnParentNode, source);
 				for (var element of Array.from(source)) {
-					if (element.getAttribute('data-filter') == null) {
+					if (element.getAttribute('data-filtertext') == null) {
 						element.classList.add('hide');
-					} else if (!element.getAttribute('data-filter').includes(el)) {
+					} else if (!element.getAttribute('data-filtertext').includes(el)) {
 						element.classList.add('hide');
 					}
 				}
 				const currentSearchParams = new URLSearchParams(window.location.search);
-				currentSearchParams.set('search', el);
+				currentSearchParams.set('search', newel.getAttribute("data-filter"));
 				window.history.pushState({}, '', '?' + currentSearchParams);
 				e.target.classList.add('btn__filter--active');
 			});
@@ -73,7 +66,8 @@ export default (function (btnParentNode, source) {
 
 	if (btnParentNode !== null) {
 		for (var x of Array.from(btnParentNode.children)) {
-			if (x.getAttribute('data-filter') === 'all') {
+			if (x.getAttribute('data-filtertext') === 'all') {
+				x.setAttribute("data-filter", "all");
 				x.addEventListener('click', (e) => {
 					e.preventDefault();
 					reset(btnParentNode, source);
@@ -102,3 +96,12 @@ function reset(btnParentNode, source) {
 		}
 	}
 }
+
+function textTransform(text){
+
+	text = text.toLowerCase();
+	text = text.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); //odstranění háčků a čárek
+	text = text.replaceAll(" ","-");
+	return text;
+}
+
